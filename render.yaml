@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: core-users-api
-    runtime: node
-    buildCommand: npm install && npm run build
-    startCommand: node dist/server.js
