@@ -16,6 +16,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=22.22.0 <25.5.0"
+  },
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/mpetry9/core-users-api/issues"
