@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import geoip from "geoip-lite";
 import { UAParser } from "ua-parser-js";
+import usersRoutes from "./routes/users.routes";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 
 const app = express();
 
@@ -42,5 +44,12 @@ app.get("/health", (req: Request, res: Response) => {
     },
   });
 });
+
+// API Routes
+app.use("/api/users", usersRoutes);
+
+// Error Handlers (must be last)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
