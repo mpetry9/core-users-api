@@ -13,6 +13,7 @@ Act as an autonomous agent that connects to the database and retrieves informati
 
 ### Use the following steps to complete the task:
 
+- Use the neon MCP Server set on this repo to connect to the database and execute SQL queries.
 - Retrieve users who signed up within the last 30 days, or within a custom date range specified in the input.
 - Return only the user's name and the date and time of sign-up.
 - Limit results to the most recent 100 users if not specified in the input, it avoids overwhelming the response with too much data.
