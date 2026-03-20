@@ -22,7 +22,8 @@ async function getLastThreeUsers(): Promise<void> {
     ssl: {
       rejectUnauthorized: false,
     },
-    connectionTimeoutMillis: 25000, // 25 second timeout
+    connectionTimeoutMillis: 25000, // 25 second connection timeout
+    statement_timeout: 25000, // 25 second query timeout
   });
 
   try {
@@ -46,10 +47,6 @@ async function getLastThreeUsers(): Promise<void> {
     const startTime = Date.now();
     const result = await pool.query<UserResult>(query);
     const duration = Date.now() - startTime;
-
-    if (duration > 25000) {
-      console.log('⚠️  Warning: Query took longer than expected');
-    }
 
     if (result.rows.length === 0) {
       console.log('ℹ️  No users found in the database');
