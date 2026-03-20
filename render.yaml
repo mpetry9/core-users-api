@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: core-users-api
+    runtime: node
+    buildCommand: yarn install --production=false && yarn build
+    startCommand: node dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
