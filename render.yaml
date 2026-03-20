@@ -2,7 +2,7 @@ services:
   - type: web
     name: core-users-api
     runtime: node
-    buildCommand: NODE_ENV=development npm ci && npm run build
+    buildCommand: npm ci && npx tsc && ls -la dist/
     startCommand: node dist/server.js
     healthCheckPath: /health
     envVars:
