@@ -1,6 +1,7 @@
 import { Pool, QueryResult } from "pg";
 import Database from "../config/database";
 import { User, CreateUserDTO, UpdateUserDTO } from "../types/user.types";
+import { UserWithPassword } from "../types/auth.types";
 
 class UserModel {
   private pool: Pool;
@@ -99,6 +100,81 @@ class UserModel {
 
     const result = await this.pool.query(query, values);
     return result.rows.length > 0 ? (result.rows[0] as User) : null;
+  }
+
+  // ============================================
+  // Authentication Methods
+  // ============================================
+
+  /**
+   * Finds a user by email and includes password hash (for authentication)
+   * @param email - User email
+   * @returns User with password hash or null
+   */
+  async findByEmailWithPassword(
+    email: string,
+  ): Promise<UserWithPassword | null> {
+    const query = `
+      SELECT id, name, email, status, password_hash, created_at, updated_at 
+      FROM ${this.tableName} 
+      WHERE email = $1
+    `;
+    const result = await this.pool.query(query, [email]);
+    return result.rows.length > 0 ? (result.rows[0] as UserWithPassword) : null;
+  }
+
+  /**
+   * Creates a user with password hash
+   * @param userData - User data including password hash
+   * @returns Created user
+   */
+  async createWithPassword(
+    userData: CreateUserDTO & { password_hash: string },
+  ): Promise<User> {
+    const query = `
+      INSERT INTO ${this.tableName} (name, email, password_hash, status) 
+      VALUES ($1, $2, $3, $4) 
+      RETURNING id, name, email, status, created_at, updated_at
+    `;
+    const values = [
+      userData.name,
+      userData.email,
+      userData.password_hash,
+      userData.status || "active",
+    ];
+    const result = await this.pool.query(query, values);
+    return result.rows[0] as User;
+  }
+
+  /**
+   * Updates a user's password
+   * @param userId - User ID
+   * @param passwordHash - New password hash
+   * @returns Updated user or null
+   */
+  async updatePassword(
+    userId: number,
+    passwordHash: string,
+  ): Promise<User | null> {
+    const query = `
+      UPDATE ${this.tableName} 
+      SET password_hash = $1, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = $2 
+      RETURNING id, name, email, status, created_at, updated_at
+    `;
+    const result = await this.pool.query(query, [passwordHash, userId]);
+    return result.rows.length > 0 ? (result.rows[0] as User) : null;
+  }
+
+  /**
+   * Checks if an email already exists in the database
+   * @param email - Email to check
+   * @returns True if email exists
+   */
+  async emailExists(email: string): Promise<boolean> {
+    const query = `SELECT EXISTS(SELECT 1 FROM ${this.tableName} WHERE email = $1)`;
+    const result = await this.pool.query(query, [email]);
+    return result.rows[0].exists;
   }
 
   async delete(id: number): Promise<boolean> {

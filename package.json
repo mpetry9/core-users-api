@@ -7,7 +7,8 @@
     "build": "tsc",
     "prestart": "npm ci && npm run build",
     "start": "node dist/index.js",
-    "dev": "nodemon --exec ts-node src/index.ts"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "seed": "ts-node scripts/seed-users.ts"
   },
   "repository": {
     "type": "git",
@@ -25,15 +26,23 @@
   },
   "homepage": "https://github.com/mpetry9/core-users-api#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
     "geoip-lite": "^2.0.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "ua-parser-js": "^2.0.9"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/geoip-lite": "^1.4.4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.18.0",
     "@types/ua-parser-js": "^0.7.39",
