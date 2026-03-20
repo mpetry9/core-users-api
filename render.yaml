@@ -2,5 +2,5 @@ services:
   - type: web
     name: core-users-api
     runtime: node
-    buildCommand: npm install && yarn install --frozen-lockfile
-    startCommand: node src/server.js
+    buildCommand: npm install && npm run build
+    startCommand: node dist/server.js
