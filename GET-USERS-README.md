@@ -76,7 +76,7 @@ Found 3 user(s):
 - ❌ If DATABASE_URL is not set: Script exits with error message
 - ❌ If database connection fails: Displays connection error
 - ❌ If query fails: Displays query error
-- ⚠️ If query takes > 25s: Displays timeout warning
+- ❌ If query takes > 25s: Query will timeout and throw an error
 - ℹ️ If no users found: Displays "No users found" message
 
 ## Database Schema Reference
