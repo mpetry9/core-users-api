@@ -82,12 +82,32 @@ LIMIT 3
 ✅ Limit results (hardcoded to 3 users as requested)  
 ✅ Uses existing database connection configuration  
 
-## Next Steps
+## Next Steps to Execute
 
-To execute this script and see the actual data from your database:
+To execute this script and retrieve the actual data from your database:
 
-1. Obtain your DATABASE_URL from the Neon dashboard (https://console.neon.tech)
-2. Create a `.env` file with the connection string
-3. Run `npm run last-signups`
+### 1. Obtain DATABASE_URL
+Get your Neon PostgreSQL connection string from:
+- **Neon Dashboard**: https://console.neon.tech
+- **Project**: core-users-api (misty-dawn-58416880)
+- **Connection String Format**: `postgresql://username:password@hostname/database?sslmode=require`
+
+### 2. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env and add: DATABASE_URL=<your-connection-string>
+```
+
+### 3. Run the Script
+```bash
+# Development mode (with ts-node)
+npm run last-signups
+
+# OR Production mode (compiled JavaScript)
+npm run last-signups:prod
+```
+
+### Current Status
+⚠️ The script is complete and tested for TypeScript compilation, but requires a valid DATABASE_URL environment variable to connect to the database and retrieve the actual user data.
 
 The script is production-ready and follows all best practices from the existing codebase.
