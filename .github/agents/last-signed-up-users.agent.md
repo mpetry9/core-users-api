@@ -2,7 +2,7 @@
 name: last-signed-up-users
 description: This agent retrieves information about users who have signed up recently.
 argument-hint: The inputs this agent expects, e.g., "Show me users who signed up last week" or "Bring up just the name and date time of sign up for each user in the last 3 days between 9am and 5pm."
-# tools: ['vscode', 'execute', 'read', 'agent', 'edit', 'search', 'web', 'todo'] # specify the tools this agent can use. If not set, all enabled tools are allowed.
+tools: ["neon/*"]
 ---
 
 ### Overview
