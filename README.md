@@ -5,6 +5,10 @@ A RESTful API built with Node.js, Express, TypeScript, and PostgreSQL (Neon) fol
 ## Features
 
 - ✅ User management with pagination
+- ✅ **Dual Authentication System (JWT + API Keys)**
+- ✅ **Secure password hashing with bcrypt**
+- ✅ **Rate limiting for authentication endpoints**
+- ✅ **CORS and security headers (Helmet)**
 - ✅ PostgreSQL database with Neon (serverless)
 - ✅ TypeScript for type safety
 - ✅ MVC architecture (Models, Controllers, Routes)
@@ -14,29 +18,61 @@ A RESTful API built with Node.js, Express, TypeScript, and PostgreSQL (Neon) fol
 - ✅ Environment-based configuration
 - ✅ DRY principle with reusable utilities
 
+## 🔐 Authentication
+
+This API supports **dual authentication**:
+
+- **JWT (JSON Web Tokens)** - For web/mobile applications (recommended for React frontend)
+- **API Keys** - For direct API access, testing, and documentation
+
+**📖 Full Authentication Guide:** See [AUTHENTICATION.md](AUTHENTICATION.md) for:
+
+- Setup instructions
+- Database migration guide
+- API endpoint documentation
+- Testing examples
+- React integration guide
+- Security best practices
+
 ## Project Structure
 
 ```
 src/
 ├── config/
+│   ├── auth.ts              # Authentication configuration
 │   └── database.ts          # Database connection configuration
 ├── controllers/
+│   ├── apiKeys.controller.ts # API key CRUD operations
+│   ├── auth.controller.ts   # Authentication endpoints
 │   └── users.controller.ts  # User business logic
 ├── middleware/
+│   ├── auth.middleware.ts   # JWT + API Key authentication
 │   ├── errorHandler.ts      # Global error handling
 │   └── validators/
+│       ├── apiKey.validator.ts      # API key validation
+│       ├── auth.validator.ts        # Auth input validation
 │       └── pagination.validator.ts  # Query parameter validation
 ├── models/
+│   ├── apiKey.model.ts      # API key data access layer
 │   └── user.model.ts        # User data access layer
 ├── routes/
+│   ├── apiKeys.routes.ts    # API key routes
+│   ├── auth.routes.ts       # Authentication routes
 │   └── users.routes.ts      # User routes definition
 ├── types/
+│   ├── auth.types.ts        # Authentication interfaces
 │   ├── pagination.types.ts  # Pagination interfaces
 │   └── user.types.ts        # User interfaces
 ├── utils/
+│   ├── auth.util.ts         # JWT, password, and API key utilities
 │   └── pagination.util.ts   # Pagination helper functions
 ├── app.ts                   # Express app configuration
 └── index.ts                 # Application entry point
+
+migrations/
+├── 001_add_authentication.sql            # Authentication schema migration
+├── 001_add_authentication_rollback.sql  # Rollback migration
+└── README.md                             # Migration documentation
 ```
 
 ## Database Schema
@@ -46,16 +82,91 @@ src/
 - `id` - SERIAL PRIMARY KEY
 - `name` - VARCHAR(255) NOT NULL
 - `email` - VARCHAR(255) UNIQUE NOT NULL (indexed)
+- `password_hash` - VARCHAR(255) NULL (bcrypt hashed password)
 - `status` - VARCHAR(50) DEFAULT 'active'
 - `created_at` - TIMESTAMP DEFAULT CURRENT_TIMESTAMP (indexed)
 - `updated_at` - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
+**API Keys Table:**
+
+- `id` - SERIAL PRIMARY KEY
+- `user_id` - INTEGER NOT NULL (foreign key to users)
+- `key_hash` - VARCHAR(255) UNIQUE NOT NULL (SHA-256 hashed API key)
+- `name` - VARCHAR(100) NOT NULL (user-friendly identifier)
+- `created_at` - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+- `last_used_at` - TIMESTAMP NULL (tracks usage)
+- `expires_at` - TIMESTAMP NULL (optional expiration)
+- `is_active` - BOOLEAN DEFAULT true (soft delete flag)
+
 ## API Endpoints
 
-### Get Users (Paginated)
+### 🔓 Public Endpoints
+
+#### Health Check
+
+```http
+GET /health
+```
+
+Returns server status and client information (IP, country, browser, OS, language).
+
+### 🔐 Authentication Endpoints
+
+#### Signup
+
+```http
+POST /auth/signup
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123"
+}
+```
+
+#### Login
+
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "SecurePass123"
+}
+```
+
+#### Refresh Token
+
+```http
+POST /auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "your-refresh-token"
+}
+```
+
+#### Get Current User
+
+```http
+GET /auth/me
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+### 🔒 Protected Endpoints (Requires Authentication)
+
+Use either JWT or API Key authentication:
+
+- **JWT:** `Authorization: Bearer YOUR_ACCESS_TOKEN`
+- **API Key:** `Authorization: ApiKey sk_live_...`
+
+#### Get Users (Paginated)
 
 ```http
 GET /api/users?page=1&limit=10
+Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 **Query Parameters:**
@@ -88,10 +199,11 @@ GET /api/users?page=1&limit=10
 }
 ```
 
-### Get User by ID
+#### Get User by ID
 
 ```http
 GET /api/users/:id
+Authorization: Bearer YOUR_ACCESS_TOKEN
 ```
 
 **Response:**
@@ -109,11 +221,38 @@ GET /api/users/:id
 }
 ```
 
-### Health Check
+### 🔑 API Key Management
+
+#### Create API Key (JWT Required)
 
 ```http
-GET /health
+POST /api/keys
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "My API Key",
+  "expiresInDays": 90
+}
 ```
+
+Returns the API key **only once**. Save it securely!
+
+#### List API Keys
+
+```http
+GET /api/keys
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+#### Revoke API Key
+
+```http
+DELETE /api/keys/:id
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+**📖 For complete endpoint documentation and examples, see [AUTHENTICATION.md](AUTHENTICATION.md)**
 
 ## Installation
 
@@ -134,16 +273,43 @@ npm install
 
 ```bash
 cp .env.example .env
-# Edit .env with your Neon database connection string
+# Edit .env with your configuration:
+# - Add your Neon database connection string
+# - Generate a secure JWT_SECRET (min 32 characters)
+# - Configure CORS origins for your React frontend
 ```
 
-4. **Run the development server:**
+4. **✅ Database Setup (Already Complete)**
+
+The database tables have been created with the correct schema. No migration needed!
+
+5. **Seed users (Optional but recommended):**
+
+```bash
+# Edit scripts/seed-users.ts to add your test users
+# Then run:
+npm run seed
+```
+
+This will create test users with hashed passwords that you can use for testing.
+
+6. **Run the development server:**
 
 ```bash
 npm run dev
 ```
 
-5. **Build for production:**
+7. **Test the authentication system:**
+
+```bash
+# Make the test script executable (if needed)
+chmod +x test-auth.sh
+
+# Run the test script
+./test-auth.sh
+```
+
+8. **Build for production:**
 
 ```bash
 npm run build
@@ -178,6 +344,8 @@ bash test-api.sh
 - **Language:** TypeScript 5
 - **Database:** PostgreSQL (Neon)
 - **Database Client:** node-postgres (pg)
+- **Authentication:** jsonwebtoken, bcrypt
+- **Security:** helmet, cors, express-rate-limit
 - **Development:** ts-node, nodemon
 
 ## Best Practices Implemented
