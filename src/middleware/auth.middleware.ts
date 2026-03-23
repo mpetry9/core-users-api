@@ -1,77 +1,15 @@
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
+import ApiKeyModel from "../models/apiKey.model";
+import UserModel from "../models/user.model";
 import { AuthenticatedRequest } from "../types/auth.types";
 import {
-  verifyToken,
   extractAuthToken,
   hashApiKey,
   isValidApiKeyFormat,
+  verifyToken,
 } from "../utils/auth.util";
-import UserModel from "../models/user.model";
-import ApiKeyModel from "../models/apiKey.model";
 
 const apiKeyModel = new ApiKeyModel();
-
-// ============================================
-// Authentication Middleware (JWT + API Key)
-// ============================================
-
-/**
- * Middleware that authenticates requests using either JWT or API Key
- * Supports two authentication methods:
- * - Bearer token (JWT): Authorization: Bearer <token>
- * - API Key: Authorization: ApiKey <key>
- */
-export async function authenticate(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      res.status(401).json({
-        error: "Unauthorized",
-        message: "Authorization header is required",
-      });
-      return;
-    }
-
-    const { type, token } = extractAuthToken(authHeader);
-
-    if (!type || !token) {
-      res.status(401).json({
-        error: "Unauthorized",
-        message:
-          'Invalid authorization header format. Use "Bearer <token>" or "ApiKey <key>"',
-      });
-      return;
-    }
-
-    // Handle JWT authentication
-    if (type === "bearer") {
-      await authenticateWithJWT(req, res, next, token);
-      return;
-    }
-
-    // Handle API Key authentication
-    if (type === "apiKey") {
-      await authenticateWithApiKey(req, res, next, token);
-      return;
-    }
-
-    res.status(401).json({
-      error: "Unauthorized",
-      message: "Unsupported authentication method",
-    });
-  } catch (error) {
-    console.error("Authentication error:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "Authentication failed",
-    });
-  }
-}
 
 // ============================================
 // JWT Authentication
@@ -230,6 +168,68 @@ async function authenticateWithApiKey(
     res.status(401).json({
       error: "Unauthorized",
       message: "API key authentication failed",
+    });
+  }
+}
+
+// ============================================
+// Authentication Middleware (JWT + API Key)
+// ============================================
+
+/**
+ * Middleware that authenticates requests using either JWT or API Key
+ * Supports two authentication methods:
+ * - Bearer token (JWT): Authorization: Bearer <token>
+ * - API Key: Authorization: ApiKey <key>
+ */
+export async function authenticate(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      res.status(401).json({
+        error: "Unauthorized",
+        message: "Authorization header is required",
+      });
+      return;
+    }
+
+    const { type, token } = extractAuthToken(authHeader);
+
+    if (!type || !token) {
+      res.status(401).json({
+        error: "Unauthorized",
+        message:
+          'Invalid authorization header format. Use "Bearer <token>" or "ApiKey <key>"',
+      });
+      return;
+    }
+
+    // Handle JWT authentication
+    if (type === "bearer") {
+      await authenticateWithJWT(req, res, next, token);
+      return;
+    }
+
+    // Handle API Key authentication
+    if (type === "apiKey") {
+      await authenticateWithApiKey(req, res, next, token);
+      return;
+    }
+
+    res.status(401).json({
+      error: "Unauthorized",
+      message: "Unsupported authentication method",
+    });
+  } catch (error) {
+    console.error("Authentication error:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      message: "Authentication failed",
     });
   }
 }

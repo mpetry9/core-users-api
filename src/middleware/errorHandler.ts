@@ -9,7 +9,7 @@ export const errorHandler = (
   err: ErrorWithStatus,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ): void => {
   const statusCode = err.status || err.statusCode || 500;
   const message = err.message || "Internal Server Error";
@@ -18,7 +18,10 @@ export const errorHandler = (
   console.error(`[Stack] ${err.stack}`);
 
   // PostgreSQL specific errors
-  if (err.name === "DatabaseError" || (err as any).code?.startsWith("23")) {
+  if (
+    err.name === "DatabaseError" ||
+    (err as unknown as { code?: string }).code?.startsWith("23")
+  ) {
     res.status(400).json({
       error: "Database Error",
       message: "A database constraint was violated",
@@ -40,7 +43,7 @@ export const errorHandler = (
 export const notFoundHandler = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ): void => {
   res.status(404).json({
     error: "Not Found",

@@ -1,20 +1,20 @@
 import { Request, Response } from "express";
 import UserModel from "../models/user.model";
 import {
-  hashPassword,
-  verifyPassword,
-  generateAccessToken,
-  generateRefreshToken,
-  verifyToken,
-} from "../utils/auth.util";
-import {
-  SignupRequest,
+  AuthenticatedRequest,
   LoginRequest,
+  RefreshTokenRequest,
+  SignupRequest,
   TokenResponse,
   UserResponse,
-  AuthenticatedRequest,
-  RefreshTokenRequest,
 } from "../types/auth.types";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  hashPassword,
+  verifyPassword,
+  verifyToken,
+} from "../utils/auth.util";
 
 class AuthController {
   // ============================================
@@ -22,7 +22,7 @@ class AuthController {
   // Creates a new user account
   // ============================================
   async signup(
-    req: Request<{}, {}, SignupRequest>,
+    req: Request<Record<string, never>, Record<string, never>, SignupRequest>,
     res: Response,
   ): Promise<void> {
     try {
@@ -86,7 +86,7 @@ class AuthController {
   // Authenticates user and returns tokens
   // ============================================
   async login(
-    req: Request<{}, {}, LoginRequest>,
+    req: Request<Record<string, never>, Record<string, never>, LoginRequest>,
     res: Response,
   ): Promise<void> {
     try {
@@ -175,7 +175,11 @@ class AuthController {
   // Refreshes access token using refresh token
   // ============================================
   async refresh(
-    req: Request<{}, {}, RefreshTokenRequest>,
+    req: Request<
+      Record<string, never>,
+      Record<string, never>,
+      RefreshTokenRequest
+    >,
     res: Response,
   ): Promise<void> {
     try {

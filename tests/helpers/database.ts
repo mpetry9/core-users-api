@@ -65,7 +65,7 @@ export async function testConnection(): Promise<boolean> {
 /**
  * Execute a raw SQL query (useful for setup/teardown)
  */
-export async function query(sql: string, params?: any[]): Promise<any> {
+export async function query(sql: string, params?: unknown[]): Promise<unknown> {
   const pool = getTestPool();
   return pool.query(sql, params);
 }

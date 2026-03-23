@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import ApiKeyModel from "../models/apiKey.model";
-import { generateApiKey, hashApiKey } from "../utils/auth.util";
 import {
-  AuthenticatedRequest,
   ApiKeyCreateRequest,
   ApiKeyResponse,
+  AuthenticatedRequest,
 } from "../types/auth.types";
+import { generateApiKey, hashApiKey } from "../utils/auth.util";
 
 const apiKeyModel = new ApiKeyModel();
 

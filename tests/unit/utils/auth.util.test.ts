@@ -1,3 +1,5 @@
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { authConfig } from "../../../src/config/auth";
 import {
   hashPassword,
   verifyPassword,
@@ -9,8 +11,6 @@ import {
   hashApiKey,
   verifyApiKey,
 } from "../../../src/utils/auth.util";
-import { authConfig } from "../../../src/config/auth";
-import jwt from "jsonwebtoken";
 
 describe("Auth Utilities", () => {
   describe("Password Utilities", () => {
@@ -79,7 +79,7 @@ describe("Auth Utilities", () => {
       it("should include userId and type in token payload", () => {
         const payload = { userId: 123, email: "user@example.com" };
         const token = generateAccessToken(payload);
-        const decoded = jwt.decode(token) as any;
+        const decoded = jwt.decode(token) as JwtPayload;
 
         expect(decoded.userId).toBe(123);
         expect(decoded.type).toBe("access");
@@ -88,11 +88,11 @@ describe("Auth Utilities", () => {
       it("should set expiration time", () => {
         const payload = { userId: 1, email: "test@example.com" };
         const token = generateAccessToken(payload);
-        const decoded = jwt.decode(token) as any;
+        const decoded = jwt.decode(token) as JwtPayload;
 
         expect(decoded.exp).toBeDefined();
         expect(decoded.iat).toBeDefined();
-        expect(decoded.exp).toBeGreaterThan(decoded.iat);
+        expect(decoded.exp).toBeGreaterThan(decoded.iat!);
       });
     });
 
@@ -109,7 +109,7 @@ describe("Auth Utilities", () => {
       it("should include type 'refresh' in payload", () => {
         const payload = { userId: 456, email: "refresh@example.com" };
         const token = generateRefreshToken(payload);
-        const decoded = jwt.decode(token) as any;
+        const decoded = jwt.decode(token) as JwtPayload;
 
         expect(decoded.userId).toBe(456);
         expect(decoded.type).toBe("refresh");
@@ -120,11 +120,11 @@ describe("Auth Utilities", () => {
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
 
-        const accessDecoded = jwt.decode(accessToken) as any;
-        const refreshDecoded = jwt.decode(refreshToken) as any;
+        const accessDecoded = jwt.decode(accessToken) as JwtPayload;
+        const refreshDecoded = jwt.decode(refreshToken) as JwtPayload;
 
-        const accessExpiry = accessDecoded.exp - accessDecoded.iat;
-        const refreshExpiry = refreshDecoded.exp - refreshDecoded.iat;
+        const accessExpiry = accessDecoded.exp! - accessDecoded.iat!;
+        const refreshExpiry = refreshDecoded.exp! - refreshDecoded.iat!;
 
         expect(refreshExpiry).toBeGreaterThan(accessExpiry);
       });

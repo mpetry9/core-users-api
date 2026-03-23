@@ -1,5 +1,3 @@
-import { hashPassword } from "./auth";
-
 /**
  * Factory for creating test user data
  */

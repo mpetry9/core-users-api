@@ -2,6 +2,7 @@ import { Pool, PoolConfig } from "pg";
 
 class Database {
   private static instance: Database;
+
   private pool: Pool;
 
   private constructor() {
@@ -41,9 +42,11 @@ class Database {
   public async testConnection(): Promise<void> {
     try {
       const client = await this.pool.connect();
+      // eslint-disable-next-line no-console
       console.log("✅ Database connected successfully");
       client.release();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("❌ Database connection failed:", error);
       throw error;
     }
@@ -52,8 +55,9 @@ class Database {
   public async close(): Promise<void> {
     if (this.pool) {
       await this.pool.end();
-      // @ts-ignore - Reset the instance for testing
-      Database.instance = null as any;
+      // @ts-expect-error - Reset the instance for testing
+      Database.instance = null;
+      // eslint-disable-next-line no-console
       console.log("Database connection closed");
     }
   }

@@ -42,6 +42,7 @@ async function seedUsers() {
   const pool = db.getPool();
 
   try {
+    // eslint-disable-next-line no-console
     console.log("🌱 Starting user seeding...\n");
 
     for (const user of users) {
@@ -53,6 +54,7 @@ async function seedUsers() {
         );
 
         if (existingUser.rows.length > 0) {
+          // eslint-disable-next-line no-console
           console.log(
             `⚠️  User already exists: ${user.email} (ID: ${existingUser.rows[0].id})`,
           );
@@ -71,11 +73,14 @@ async function seedUsers() {
         );
 
         const createdUser = result.rows[0];
+        // eslint-disable-next-line no-console
         console.log(
           `✅ Created user: ${createdUser.name} (${createdUser.email}) - ID: ${createdUser.id}`,
         );
-      } catch (error: any) {
-        console.error(`❌ Failed to create user ${user.email}:`, error.message);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        // eslint-disable-next-line no-console
+        console.error(`❌ Failed to create user ${user.email}:`, message);
       }
     }
 
@@ -83,10 +88,12 @@ async function seedUsers() {
     const countResult = await pool.query("SELECT COUNT(*) as count FROM users");
     const totalUsers = countResult.rows[0].count;
 
+    // eslint-disable-next-line no-console
     console.log(
       `\n✨ Seeding complete! Total users in database: ${totalUsers}`,
     );
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("❌ Seeding failed:", error);
     process.exit(1);
   } finally {
