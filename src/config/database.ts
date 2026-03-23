@@ -7,9 +7,13 @@ class Database {
   private constructor() {
     const config: PoolConfig = {
       connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      // Disable SSL for local/test environments, enable for production
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? {
+              rejectUnauthorized: false,
+            }
+          : false,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,
@@ -46,8 +50,12 @@ class Database {
   }
 
   public async close(): Promise<void> {
-    await this.pool.end();
-    console.log("Database connection closed");
+    if (this.pool) {
+      await this.pool.end();
+      // @ts-ignore - Reset the instance for testing
+      Database.instance = null as any;
+      console.log("Database connection closed");
+    }
   }
 }
 
