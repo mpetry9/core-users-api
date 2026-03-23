@@ -1,16 +1,14 @@
 import request from "supertest";
-import express from "express";
+import app from "../../src/app";
+import Database from "../../src/config/database";
 import {
   cleanDatabase,
   getTestPool,
   closeTestPool,
   query,
 } from "../helpers/database";
-import { createAuthUser, hashPassword } from "../helpers/auth";
-import Database from "../../src/config/database";
 
 // Import the app
-import app from "../../src/app";
 
 describe("Auth Routes (E2E)", () => {
   beforeAll(async () => {
@@ -384,7 +382,7 @@ describe("Auth Routes (E2E)", () => {
 
   describe("GET /auth/me", () => {
     let accessToken: string;
-    let user: any;
+    let user: { id: number; name: string; email: string; status: string };
 
     beforeEach(async () => {
       const response = await request(app).post("/auth/signup").send({

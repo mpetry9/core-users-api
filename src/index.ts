@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
-
 // Load environment variables FIRST before any other imports
 dotenv.config();
-
 import app from "./app";
 import Database from "./config/database";
 
@@ -16,10 +14,13 @@ const startServer = async (): Promise<void> => {
 
     // Start the server
     app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
       console.log(`🚀 Server running on port ${PORT}`);
+      // eslint-disable-next-line no-console
       console.log(`📍 Environment: ${process.env.NODE_ENV || "development"}`);
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Failed to start server:", error);
     process.exit(1);
   }
@@ -27,6 +28,7 @@ const startServer = async (): Promise<void> => {
 
 // Handle graceful shutdown
 process.on("SIGINT", async () => {
+  // eslint-disable-next-line no-console
   console.log("\n🛑 Shutting down gracefully...");
   const db = Database.getInstance();
   await db.close();
@@ -34,6 +36,7 @@ process.on("SIGINT", async () => {
 });
 
 process.on("SIGTERM", async () => {
+  // eslint-disable-next-line no-console
   console.log("\n🛑 Shutting down gracefully...");
   const db = Database.getInstance();
   await db.close();

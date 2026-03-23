@@ -1,6 +1,8 @@
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../../../src/types/auth.types";
+import { authenticate } from "../../../src/middleware/auth.middleware";
+import ApiKeyModel from "../../../src/models/apiKey.model";
 import UserModel from "../../../src/models/user.model";
+import { AuthenticatedRequest } from "../../../src/types/auth.types";
 import * as authUtil from "../../../src/utils/auth.util";
 
 // Mock the models BEFORE importing authenticate
@@ -17,15 +19,13 @@ jest.mock("../../../src/models/apiKey.model", () => {
   return jest.fn().mockImplementation(() => mockInstance);
 });
 
-// Import ApiKeyModel after mocking to get the mocked constructor
-import ApiKeyModel from "../../../src/models/apiKey.model";
-
-// Import authenticate AFTER all mocks are set up
-import { authenticate } from "../../../src/middleware/auth.middleware";
-
 // Get reference to the mock instance
 const ApiKeyModelMock = ApiKeyModel as jest.MockedClass<typeof ApiKeyModel>;
-const mockApiKeyModelInstance = new ApiKeyModelMock() as any;
+const mockApiKeyModelInstance = new ApiKeyModelMock() as unknown as {
+  findByHash: jest.Mock;
+  isExpired: jest.Mock;
+  updateLastUsed: jest.Mock;
+};
 
 describe("Auth Middleware", () => {
   let mockReq: Partial<AuthenticatedRequest>;
