@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
-import helmet from "helmet";
 import cors from "cors";
+import express, { Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import geoip from "geoip-lite";
+import helmet from "helmet";
 import { UAParser } from "ua-parser-js";
-import usersRoutes from "./routes/users.routes";
-import authRoutes from "./routes/auth.routes";
-import apiKeysRoutes from "./routes/apiKeys.routes";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { authConfig } from "./config/auth";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import apiKeysRoutes from "./routes/apiKeys.routes";
+import authRoutes from "./routes/auth.routes";
+import usersRoutes from "./routes/users.routes";
 
 const app = express();
 

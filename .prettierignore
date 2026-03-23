@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Migrations (SQL files)
+migrations/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Testing
+*.snap
+
+# Package manager
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

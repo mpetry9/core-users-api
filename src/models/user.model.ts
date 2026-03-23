@@ -1,10 +1,11 @@
 import { Pool, QueryResult } from "pg";
 import Database from "../config/database";
-import { User, CreateUserDTO, UpdateUserDTO } from "../types/user.types";
 import { UserWithPassword } from "../types/auth.types";
+import { User, CreateUserDTO, UpdateUserDTO } from "../types/user.types";
 
 class UserModel {
   private pool: Pool;
+
   private tableName = "users";
 
   constructor() {
@@ -68,7 +69,7 @@ class UserModel {
 
   async update(id: number, userData: UpdateUserDTO): Promise<User | null> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let paramIndex = 1;
 
     if (userData.name !== undefined) {

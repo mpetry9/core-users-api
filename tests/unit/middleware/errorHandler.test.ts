@@ -4,6 +4,12 @@ import {
   notFoundHandler,
 } from "../../../src/middleware/errorHandler";
 
+interface ErrorWithStatus extends Error {
+  status?: number;
+  statusCode?: number;
+  code?: string;
+}
+
 describe("Error Handler Middleware", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
@@ -15,7 +21,7 @@ describe("Error Handler Middleware", () => {
       method: "GET",
       url: "/test",
       path: "/test",
-    } as any;
+    } as Request;
     mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
@@ -32,7 +38,7 @@ describe("Error Handler Middleware", () => {
 
   describe("errorHandler", () => {
     it("should handle error with status code", () => {
-      const error: any = new Error("Test error");
+      const error = new Error("Test error") as ErrorWithStatus;
       error.status = 400;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -47,7 +53,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should handle error with statusCode field", () => {
-      const error: any = new Error("Custom error");
+      const error = new Error("Custom error") as ErrorWithStatus;
       error.statusCode = 403;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -64,12 +70,7 @@ describe("Error Handler Middleware", () => {
     it("should default to 500 for errors without status", () => {
       const error = new Error("Internal error");
 
-      errorHandler(
-        error as any,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith(
@@ -80,7 +81,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should handle database constraint errors", () => {
-      const error: any = new Error("Unique constraint violation");
+      const error = new Error("Unique constraint violation") as ErrorWithStatus;
       error.name = "DatabaseError";
       error.code = "23505";
 
@@ -96,7 +97,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should handle PostgreSQL code 23xxx errors", () => {
-      const error: any = new Error("Foreign key violation");
+      const error = new Error("Foreign key violation") as ErrorWithStatus;
       error.code = "23503";
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -114,7 +115,7 @@ describe("Error Handler Middleware", () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "development";
 
-      const error: any = new Error("Dev error");
+      const error = new Error("Dev error") as ErrorWithStatus;
       error.status = 400;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -132,7 +133,7 @@ describe("Error Handler Middleware", () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "production";
 
-      const error: any = new Error("Prod error");
+      const error = new Error("Prod error") as ErrorWithStatus;
       error.status = 400;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -149,12 +150,7 @@ describe("Error Handler Middleware", () => {
 
       const error = new Error("Sensitive internal error");
 
-      errorHandler(
-        error as any,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith(
@@ -172,12 +168,7 @@ describe("Error Handler Middleware", () => {
 
       const error = new Error("Detailed internal error");
 
-      errorHandler(
-        error as any,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -189,7 +180,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should log error to console", () => {
-      const error: any = new Error("Log test error");
+      const error = new Error("Log test error") as ErrorWithStatus;
       error.status = 400;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -203,7 +194,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should handle error without message", () => {
-      const error: any = new Error();
+      const error = new Error() as ErrorWithStatus;
       error.status = 500;
 
       errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
@@ -221,7 +212,7 @@ describe("Error Handler Middleware", () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "development";
 
-      const error: any = new Error("Duplicate key violation");
+      const error = new Error("Duplicate key violation") as ErrorWithStatus;
       error.name = "DatabaseError";
       error.code = "23505";
 
@@ -240,7 +231,7 @@ describe("Error Handler Middleware", () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "production";
 
-      const error: any = new Error("Duplicate key violation");
+      const error = new Error("Duplicate key violation") as ErrorWithStatus;
       error.name = "DatabaseError";
       error.code = "23505";
 
@@ -259,7 +250,7 @@ describe("Error Handler Middleware", () => {
         method: "GET",
         path: "/api/nonexistent",
         url: "/api/nonexistent",
-      } as any;
+      } as Request;
 
       notFoundHandler(mockReq as Request, mockRes as Response, mockNext);
 
@@ -273,7 +264,7 @@ describe("Error Handler Middleware", () => {
     });
 
     it("should include method in error message", () => {
-      mockReq = { method: "POST", path: "/test", url: "/test" } as any;
+      mockReq = { method: "POST", path: "/test", url: "/test" } as Request;
 
       notFoundHandler(mockReq as Request, mockRes as Response, mockNext);
 
@@ -288,7 +279,7 @@ describe("Error Handler Middleware", () => {
       const methods = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
       methods.forEach((method) => {
-        mockReq = { method, path: "/test/path", url: "/test/path" } as any;
+        mockReq = { method, path: "/test/path", url: "/test/path" } as Request;
         jest.clearAllMocks();
 
         notFoundHandler(mockReq as Request, mockRes as Response, mockNext);
