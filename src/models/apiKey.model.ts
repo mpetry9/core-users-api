@@ -1,10 +1,11 @@
-import { Pool, QueryResult } from "pg";
+import { Pool } from "pg";
 import Database from "../config/database";
 import { ApiKey, ApiKeyResponse } from "../types/auth.types";
-import { hashApiKey, getApiKeyPreview } from "../utils/auth.util";
+import { getApiKeyPreview } from "../utils/auth.util";
 
 class ApiKeyModel {
   private pool: Pool;
+
   private tableName = "api_keys";
 
   constructor() {

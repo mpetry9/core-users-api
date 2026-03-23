@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getUsers, getUserById } from "../controllers/users.controller";
-import { validatePaginationParams } from "../middleware/validators/pagination.validator";
 import { authenticate } from "../middleware/auth.middleware";
+import { validatePaginationParams } from "../middleware/validators/pagination.validator";
 
 const router = Router();
 

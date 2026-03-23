@@ -1,6 +1,7 @@
+import crypto from "crypto";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
-import crypto from "crypto";
+import type { StringValue } from "ms";
 import { authConfig } from "../config/auth";
 import { JWTPayload, DecodedToken } from "../types/auth.types";
 
@@ -46,7 +47,7 @@ export function generateAccessToken(payload: Omit<JWTPayload, "type">): string {
   };
 
   const options: SignOptions = {
-    expiresIn: authConfig.jwt.accessExpiresIn as any,
+    expiresIn: authConfig.jwt.accessExpiresIn as StringValue,
   };
 
   return jwt.sign(tokenPayload, authConfig.jwt.secret, options);
@@ -66,7 +67,7 @@ export function generateRefreshToken(
   };
 
   const options: SignOptions = {
-    expiresIn: authConfig.jwt.refreshExpiresIn as any,
+    expiresIn: authConfig.jwt.refreshExpiresIn as StringValue,
   };
 
   return jwt.sign(tokenPayload, authConfig.jwt.secret, options);

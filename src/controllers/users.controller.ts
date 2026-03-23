@@ -8,7 +8,12 @@ import {
 } from "../utils/pagination.util";
 
 export const getUsers = async (
-  req: Request<{}, {}, {}, PaginationQuery>,
+  req: Request<
+    Record<string, never>,
+    Record<string, never>,
+    Record<string, never>,
+    PaginationQuery
+  >,
   res: Response<PaginatedResponse<User>>,
   next: NextFunction,
 ): Promise<void> => {

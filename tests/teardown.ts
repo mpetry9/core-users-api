@@ -10,6 +10,7 @@ export default async function globalTeardown() {
     const db = Database.getInstance();
     await db.close();
 
+    // eslint-disable-next-line no-console
     console.log("\n✨ Test environment cleanup complete\n");
   } catch (error) {
     console.error("Error during teardown:", error);
