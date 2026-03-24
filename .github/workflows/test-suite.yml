@@ -53,7 +53,7 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
           JWT_SECRET: test-jwt-secret-for-ci-environment-min-32-characters-long
           JWT_ACCESS_EXPIRES_IN: 1h
           JWT_REFRESH_EXPIRES_IN: 7d
