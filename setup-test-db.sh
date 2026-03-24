@@ -28,11 +28,11 @@ else
 fi
 
 # Apply migrations
-echo "Applying migrations..."
-if psql -d core_users_test -f migrations/001_add_authentication.sql > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ Migrations applied successfully${NC}"
+echo "Applying schema..."
+if psql -d core_users_test -f migrations/000_initial_schema.sql > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ Schema applied successfully${NC}"
 else
-    echo -e "${RED}❌ Failed to apply migrations${NC}"
+    echo -e "${RED}❌ Failed to apply schema${NC}"
     exit 1
 fi
 

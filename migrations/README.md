@@ -2,9 +2,13 @@
 
 This directory contains SQL migration files for the database schema.
 
-## ✅ Tables Already Created!
+## Migration Files
 
-The database tables have been created directly via Neon MCP Server with the proper schema:
+### Initial Schema (`000_initial_schema.sql`)
+
+**Purpose:** Creates the complete database schema for fresh installations (e.g., CI/CD pipelines, new environments).
+
+This file creates both tables with the full schema:
 
 **Users table:**
 
@@ -27,14 +31,35 @@ The database tables have been created directly via Neon MCP Server with the prop
 - `expires_at` (TIMESTAMP NULL)
 - `is_active` (BOOLEAN DEFAULT true)
 
-All necessary indexes have been created for optimal performance.
+All necessary indexes and constraints are included for optimal performance and data integrity.
 
-## Migration Files (For Reference)
+### Authentication Migration (`001_add_authentication.sql`)
 
-The migration files are kept for reference and future schema changes:
+**Purpose:** Adds authentication support to an existing users table.
 
-- `001_add_authentication.sql` - Adds password_hash column to users table and creates api_keys table
-- `001_add_authentication_rollback.sql` - Rolls back the authentication changes
+- Adds `password_hash` column to users table (if not exists)
+- Creates api_keys table (if not exists)
+- For incremental updates on existing databases
+
+**Rollback:** Use `001_add_authentication_rollback.sql` to revert changes.
+
+## Usage
+
+### For Fresh Database (CI/CD, New Environments)
+
+```bash
+psql -d your_database -f migrations/000_initial_schema.sql
+```
+
+### For Existing Database (Adding Authentication)
+
+```bash
+psql -d your_database -f migrations/001_add_authentication.sql
+```
+
+## ✅ Production Note
+
+The production database tables were created directly via Neon MCP Server with the proper schema.
 
 ## Notes
 
