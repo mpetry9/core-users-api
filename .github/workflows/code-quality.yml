@@ -1,10 +1,8 @@
-name: 1. Lint
+name: Code Quality
 
 on:
   push:
-    branches: [main, develop]
   pull_request:
-    branches: [main, develop]
 
 jobs:
   lint:

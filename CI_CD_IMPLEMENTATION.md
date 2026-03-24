@@ -1,48 +1,66 @@
 # CI/CD Pipeline Implementation Summary
 
+## 🔄 Latest Updates
+
+**Sequential Workflow Dependencies & All-Branch Triggers**
+
+- ✅ Workflows renamed to follow industry best practices (removed numbered prefixes)
+- ✅ Sequential execution: Code Quality → Test Suite → Security Scan → Test Coverage
+- ✅ Triggers now work on **all branches** (not just main/develop)
+- ✅ Each workflow waits for the previous one to succeed before running
+- ✅ Fast-fail: Pipeline stops at first failure for quicker feedback
+
 ## ✅ What Was Implemented
 
 All Phase 1 and Phase 2 tasks from the plan have been successfully implemented:
 
 ### 1. GitHub Actions Workflows
 
-#### [1-lint.yml](.github/workflows/1-lint.yml)
+**Execution Model**: Sequential workflow dependencies ensure quality gates are enforced in order.
 
-- **Purpose**: Code quality enforcement
-- **Triggers**: Push/PR to main/develop branches
+#### [code-quality.yml](.github/workflows/code-quality.yml)
+
+- **Purpose**: Code quality enforcement (ESLint + Prettier)
+- **Triggers**: Push/PR to **any branch**
 - **Checks**:
   - ESLint (`npm run lint`)
   - Prettier formatting (`npm run format:check`)
 - **Node Version**: 22.x
 - **Fail Strategy**: Fails if any lint violations found
+- **Execution**: **Always runs first**
 
-#### [2-suite-test.yml](.github/workflows/2-suite-test.yml)
+#### [test-suite.yml](.github/workflows/test-suite.yml)
 
 - **Purpose**: Run all Jest tests (unit, integration, e2e)
-- **Triggers**: Push/PR to main/develop branches
+- **Triggers**: After Code Quality workflow completes successfully on **any branch**
+- **Dependencies**: Requires `Code Quality` workflow success
 - **Infrastructure**: PostgreSQL 16 service container
 - **Node Versions**: Matrix testing with 22.x and 25.x
 - **Tests**: All test suites via `npm test`
 - **Artifacts**: Uploads test results and coverage (30-day retention)
 - **Environment**: Full test environment with DATABASE_URL, JWT_SECRET, etc.
+- **Execution**: **Runs second**, only if Code Quality passes
 
-#### [3-vulnerabilities.yml](.github/workflows/3-vulnerabilities.yml)
+#### [security-scan.yml](.github/workflows/security-scan.yml)
 
 - **Purpose**: Security vulnerability scanning
 - **Triggers**:
-  - Push/PR when package.json or package-lock.json changes
+  - After Test Suite workflow completes successfully on **any branch**
   - Weekly schedule (Mondays at 9 AM UTC)
   - Manual dispatch
+- **Dependencies**: Requires `Test Suite` workflow success (except scheduled/manual runs)
 - **Checks**:
   - `npm audit --audit-level=moderate`
   - `npm audit --audit-level=high` (fails on high/critical)
   - GitHub Dependency Review (PR only)
 - **Fail Strategy**: Fails on high/critical vulnerabilities
+- **Execution**: **Runs third**, only if Test Suite passes
 
-#### [4-test-coverage-report.yml](.github/workflows/4-test-coverage-report.yml)
+#### [test-coverage.yml](.github/workflows/test-coverage.yml)
 
 - **Purpose**: Test coverage reporting and enforcement
-- **Triggers**: Push/PR to main/develop branches
+- **Triggers**: After Security Scan workflow completes successfully on **any branch**
+- **Dependencies**: Requires `Security Scan` workflow success
 - **Infrastructure**: PostgreSQL 16 service container (same as test suite)
 - **Coverage Tool**: Jest with lcov reporter
 - **Thresholds**: Enforces 80% lines/functions/statements, 70% branches
@@ -209,25 +227,36 @@ git push
 
 ## 🚀 Workflow Execution Order
 
-When you push or create a PR, workflows run in this order:
+**Sequential Execution Model**: Workflows are **chained using `workflow_run` triggers** to ensure quality gates are enforced in order. Each workflow only runs if the previous one succeeds.
 
-1. **Lint** (1-lint.yml) — ~30 seconds
-   - ✅ Pass → Continue to next steps
-   - ❌ Fail → Block merge, fix lint errors
+When you push or create a PR to **any branch**, workflows run in this strict order:
 
-2. **Test Suite** (2-suite-test.yml) — ~2-5 minutes
-   - ✅ Pass (22.x AND 25.x) → Continue
-   - ❌ Fail (any version) → Block merge
+1. **Code Quality** (code-quality.yml) — ~30 seconds
+   - ✅ Pass → Triggers Test Suite
+   - ❌ Fail → Pipeline stops, fix lint errors
 
-3. **Security Scan** (3-vulnerabilities.yml) — ~1-2 minutes (parallel with tests)
-   - ✅ Pass → Continue
-   - ❌ Fail → Block merge, review vulnerabilities
+2. **Test Suite** (test-suite.yml) — ~2-5 minutes
+   - Waits for Code Quality to succeed
+   - ✅ Pass (22.x AND 25.x) → Triggers Security Scan
+   - ❌ Fail (any version) → Pipeline stops
 
-4. **Coverage Report** (4-test-coverage-report.yml) — ~2-5 minutes
+3. **Security Scan** (security-scan.yml) — ~1-2 minutes
+   - Waits for Test Suite to succeed
+   - ✅ Pass → Triggers Test Coverage
+   - ❌ Fail → Pipeline stops, review vulnerabilities
+
+4. **Test Coverage** (test-coverage.yml) — ~2-5 minutes
+   - Waits for Security Scan to succeed
    - ✅ Pass (≥80% coverage) → All checks passed ✅
-   - ❌ Fail (<80% coverage) → Block merge, add tests
+   - ❌ Fail (<80% coverage) → Pipeline stops, add tests
 
-**Total CI/CD Time**: ~5-7 minutes (with parallelization)
+**Total CI/CD Time**: ~5-10 minutes (sequential execution)
+
+**Note**: Unlike the earlier parallel approach, workflows now run sequentially. This ensures:
+
+- Fast feedback (lint errors caught in 30 seconds, not after 5 minutes of tests)
+- Resource efficiency (won't run expensive tests if code quality checks fail)
+- Clear failure points (easier to identify which stage failed)
 
 ---
 
