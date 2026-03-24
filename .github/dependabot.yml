@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+
+    # Group dependencies to reduce PR noise
+    groups:
+      # Group all production dependencies
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Group all development dependencies
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Labels for PRs
+    labels:
+      - "dependencies"
+      - "automated"
+
+    # Assign reviewers (update with your team members)
+    # reviewers:
+    #   - "github-username"
+
+    # Commit message prefix
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore(dev)"
+      include: "scope"
+
+    # Always create security PRs separately
+    # Security updates are not grouped and have priority
