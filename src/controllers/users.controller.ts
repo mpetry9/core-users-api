@@ -41,7 +41,7 @@ export const getUserById = async (
   try {
     const id = parseInt(req.params.id, 10);
 
-    if (isNaN(id)) {
+    if (isNaN(id) || id <= 0) {
       res.status(400).json({
         error: "Bad Request",
         message: "Invalid user ID",

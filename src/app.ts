@@ -104,8 +104,8 @@ app.use("/auth", authRateLimiter, authRoutes);
 // Protected API Routes
 // ============================================
 
-app.use("/api/users", usersRoutes);
-app.use("/api/keys", apiKeysRoutes);
+app.use("/users", usersRoutes);
+app.use("/keys", apiKeysRoutes);
 
 // ============================================
 // Error Handlers (must be last)

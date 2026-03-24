@@ -1,19 +1,19 @@
 import { Router } from "express";
 import apiKeysController from "../controllers/apiKeys.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { authenticate, requireJWT } from "../middleware/auth.middleware";
 import { validateApiKeyCreation } from "../middleware/validators/apiKey.validator";
 
 const router = Router();
-
-// All API key routes require authentication
-router.use(authenticate);
 
 /**
  * @route   POST /api/keys
  * @desc    Create a new API key
  * @access  Private (requires JWT authentication)
  */
-router.post("/", validateApiKeyCreation, apiKeysController.create);
+router.post("/", requireJWT, validateApiKeyCreation, apiKeysController.create);
+
+// All other API key routes require authentication (JWT or API Key)
+router.use(authenticate);
 
 /**
  * @route   GET /api/keys

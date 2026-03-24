@@ -241,6 +241,7 @@ export async function authenticate(
 /**
  * Optional authentication middleware
  * Attaches user if authenticated, but doesn't require authentication
+ * If authentication fails, continues without user (no error response)
  */
 export async function optionalAuthenticate(
   req: AuthenticatedRequest,
@@ -255,11 +256,67 @@ export async function optionalAuthenticate(
     return;
   }
 
-  // Try to authenticate, but don't fail if it doesn't work
-  try {
-    await authenticate(req, res, next);
-  } catch {
-    // Authentication failed, continue without user
+  // Save original response methods
+  const originalStatus = res.status.bind(res);
+  const originalJson = res.json.bind(res);
+
+  // Create new methods that don't actually send responses
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (res as any).status = function (_code: number) {
+    // Silently ignore error responses in optional authentication
+    return res;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (res as any).json = function (_body: unknown) {
+    // Silently ignore error responses in optional authentication
+    return res;
+  };
+
+  // Create a custom next function to intercept authenticate's success callback
+  const customNext: NextFunction = () => {
+    // Authentication succeeded, but we don't need to track this
+  };
+
+  // Call authenticate with custom next
+  await authenticate(req, res, customNext);
+
+  // Restore original methods
+  res.status = originalStatus;
+  res.json = originalJson;
+
+  // Always call the real next, regardless of authentication result
+  // If auth succeeded: req.user is set and customNext was called
+  // If auth failed: req.user is not set and error response was suppressed
+  next();
+}
+
+// ============================================
+// JWT-Only Authentication Middleware
+// ============================================
+
+/**
+ * Middleware that requires JWT authentication only (rejects API key authentication)
+ * This is used for operations that should only be performed with JWT tokens,
+ * such as creating new API keys.
+ */
+export async function requireJWT(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  // First authenticate the request (accepts both JWT and API key)
+  await authenticate(req, res, () => {
+    // If authentication succeeded, check if it was JWT
+    if (req.authMethod === "apiKey") {
+      res.status(403).json({
+        error: "Forbidden",
+        message: "This operation requires JWT authentication",
+      });
+      return;
+    }
+
+    // JWT authentication confirmed, proceed
     next();
-  }
+  });
 }

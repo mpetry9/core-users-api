@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
+import type { StringValue } from "ms";
 import { authConfig } from "../../src/config/auth";
 import { query } from "./database";
 
@@ -23,7 +24,11 @@ export function generateTestJWT(
       ? authConfig.jwt.accessExpiresIn
       : authConfig.jwt.refreshExpiresIn);
 
-  return jwt.sign(payload, authConfig.jwt.secret, { expiresIn: expiry });
+  const options: SignOptions = {
+    expiresIn: expiry as StringValue,
+  };
+
+  return jwt.sign(payload, authConfig.jwt.secret, options);
 }
 
 /**
@@ -93,12 +98,13 @@ export async function createAuthUser(overrides?: {
 
   const passwordHash = await hashPassword(password);
 
-  const result = await query(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = (await query(
     "INSERT INTO users (name, email, password_hash, status) VALUES ($1, $2, $3, $4) RETURNING id, name, email, status, created_at, updated_at",
     [name, email, passwordHash, status],
-  );
+  )) as any;
 
-  const user = result.rows[0];
+  const user: any = result.rows[0];
 
   const accessToken = generateTestJWT(user.id, "access");
   const refreshToken = generateTestJWT(user.id, "refresh");
@@ -150,10 +156,11 @@ export async function createTestApiKeyInDb(
     expiresAt = expireDate;
   }
 
-  const result = await query(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = (await query(
     "INSERT INTO api_keys (user_id, key_hash, name, expires_at, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
     [userId, keyHash, name, expiresAt, isActive],
-  );
+  )) as any;
 
   return {
     apiKey,

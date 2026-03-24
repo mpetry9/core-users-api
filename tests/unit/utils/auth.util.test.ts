@@ -10,6 +10,9 @@ import {
   generateApiKey,
   hashApiKey,
   verifyApiKey,
+  getApiKeyPreview,
+  isValidApiKeyFormat,
+  extractAuthToken,
 } from "../../../src/utils/auth.util";
 
 describe("Auth Utilities", () => {
@@ -288,6 +291,128 @@ describe("Auth Utilities", () => {
         const hash = hashApiKey(apiKey);
 
         expect(() => verifyApiKey(apiKey, hash)).not.toThrow();
+      });
+    });
+
+    describe("getApiKeyPreview", () => {
+      it("should create preview for long API key", () => {
+        const apiKey = "pk_preview_abcdef123456789012345678";
+        const preview = getApiKeyPreview(apiKey);
+
+        expect(preview).toBe("pk_preview_a...");
+        expect(preview.length).toBeLessThan(apiKey.length);
+      });
+
+      it("should return full key for short keys", () => {
+        const apiKey = "short";
+        const preview = getApiKeyPreview(apiKey);
+
+        expect(preview).toBe(apiKey);
+      });
+
+      it("should return full key for exactly 12 chars", () => {
+        const apiKey = "exactlytw12c";
+        const preview = getApiKeyPreview(apiKey);
+
+        expect(preview).toBe(apiKey);
+      });
+    });
+
+    describe("isValidApiKeyFormat", () => {
+      it("should validate correct API key format", () => {
+        const apiKey = `${authConfig.apiKey.prefix}${"a".repeat(20)}`;
+        const isValid = isValidApiKeyFormat(apiKey);
+
+        expect(isValid).toBe(true);
+      });
+
+      it("should reject key without correct prefix", () => {
+        const apiKey = "wrong_prefix_abcdef123456789012345678";
+        const isValid = isValidApiKeyFormat(apiKey);
+
+        expect(isValid).toBe(false);
+      });
+
+      it("should reject key that is too short", () => {
+        const apiKey = `${authConfig.apiKey.prefix}short`;
+        const isValid = isValidApiKeyFormat(apiKey);
+
+        expect(isValid).toBe(false);
+      });
+    });
+  });
+
+  describe("Token Extraction Utilities", () => {
+    describe("extractAuthToken", () => {
+      it("should extract Bearer token", () => {
+        const authHeader = "Bearer my.jwt.token";
+        const result = extractAuthToken(authHeader);
+
+        expect(result.type).toBe("bearer");
+        expect(result.token).toBe("my.jwt.token");
+      });
+
+      it("should extract ApiKey token", () => {
+        const authHeader = "ApiKey sk_test_abc123";
+        const result = extractAuthToken(authHeader);
+
+        expect(result.type).toBe("apiKey");
+        expect(result.token).toBe("sk_test_abc123");
+      });
+
+      it("should be case-insensitive for scheme", () => {
+        const result1 = extractAuthToken("bearer token123");
+        const result2 = extractAuthToken("BEARER token456");
+        const result3 = extractAuthToken("BeArEr token789");
+
+        expect(result1.type).toBe("bearer");
+        expect(result2.type).toBe("bearer");
+        expect(result3.type).toBe("bearer");
+      });
+
+      it("should return null for undefined header", () => {
+        const result = extractAuthToken(undefined);
+
+        expect(result.type).toBeNull();
+        expect(result.token).toBeNull();
+      });
+
+      it("should return null for malformed header (no space)", () => {
+        const result = extractAuthToken("Bearertoken123");
+
+        expect(result.type).toBeNull();
+        expect(result.token).toBeNull();
+      });
+
+      it("should return null for malformed header (too many parts)", () => {
+        const result = extractAuthToken("Bearer token extra");
+
+        expect(result.type).toBeNull();
+        expect(result.token).toBeNull();
+      });
+
+      it("should return null for unsupported scheme", () => {
+        const result = extractAuthToken("Basic dXNlcjpwYXNz");
+
+        expect(result.type).toBeNull();
+        expect(result.token).toBeNull();
+      });
+    });
+  });
+
+  describe("Error handling edge cases", () => {
+    describe("verifyToken with unknown error", () => {
+      it("should rethrow unknown errors", () => {
+        // Mock jwt.verify to throw an unknown error
+        const originalVerify = jwt.verify;
+        jest.spyOn(jwt, "verify").mockImplementation(() => {
+          throw new Error("Unknown JWT error");
+        });
+
+        expect(() => verifyToken("some.token")).toThrow("Unknown JWT error");
+
+        // Restore original
+        jwt.verify = originalVerify;
       });
     });
   });

@@ -1,5 +1,8 @@
 import { Response, NextFunction } from "express";
-import { authenticate } from "../../../src/middleware/auth.middleware";
+import {
+  authenticate,
+  optionalAuthenticate,
+} from "../../../src/middleware/auth.middleware";
 import ApiKeyModel from "../../../src/models/apiKey.model";
 import UserModel from "../../../src/models/user.model";
 import { AuthenticatedRequest } from "../../../src/types/auth.types";
@@ -44,6 +47,7 @@ describe("Auth Middleware", () => {
 
     // Clear all mocks
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe("authenticate middleware", () => {
@@ -503,6 +507,233 @@ describe("Auth Middleware", () => {
         );
         expect(mockNext).not.toHaveBeenCalled();
       });
+
+      it("should handle updateLastUsed errors gracefully", async () => {
+        const apiKey = "test_key_valid_mock_32chars_long";
+        mockReq.headers = {
+          authorization: `ApiKey ${apiKey}`,
+        };
+
+        jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
+        jest.spyOn(authUtil, "hashApiKey").mockReturnValue("hashed_key");
+        mockApiKeyModelInstance.findByHash.mockResolvedValue(mockApiKeyRecord);
+        mockApiKeyModelInstance.isExpired.mockReturnValue(false);
+        mockApiKeyModelInstance.updateLastUsed.mockRejectedValue(
+          new Error("Database error"),
+        );
+        (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+        // Spy on console.error to verify it's called
+        const consoleErrorSpy = jest
+          .spyOn(console, "error")
+          .mockImplementation();
+
+        await authenticate(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext,
+        );
+
+        // Should still authenticate successfully even if updateLastUsed fails
+        expect(mockNext).toHaveBeenCalled();
+        expect(mockReq.user).toBeDefined();
+
+        // Wait for async error handler
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          "Failed to update API key last_used_at:",
+          expect.any(Error),
+        );
+
+        consoleErrorSpy.mockRestore();
+      });
+
+      it("should handle unexpected errors in API key authentication", async () => {
+        mockReq.headers = {
+          authorization: "ApiKey test_key_error_mock_32chars_",
+        };
+
+        // Mock console.error to suppress expected error logs
+        const consoleErrorSpy = jest
+          .spyOn(console, "error")
+          .mockImplementation();
+
+        jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
+        jest.spyOn(authUtil, "hashApiKey").mockImplementation(() => {
+          throw new Error("Unexpected error");
+        });
+
+        await authenticate(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext,
+        );
+
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "API key authentication failed",
+          }),
+        );
+        expect(mockNext).not.toHaveBeenCalled();
+        expect(consoleErrorSpy).toHaveBeenCalled();
+
+        consoleErrorSpy.mockRestore();
+      });
+    });
+
+    describe("Error handling", () => {
+      it("should handle non-Error exceptions in JWT authentication", async () => {
+        mockReq.headers = {
+          authorization: "Bearer some.token",
+        };
+
+        jest.spyOn(authUtil, "verifyToken").mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/no-throw-literal
+          throw "String error";
+        });
+
+        await authenticate(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext,
+        );
+
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "Invalid or expired token",
+          }),
+        );
+      });
+
+      it("should handle unsupported authentication method", async () => {
+        mockReq.headers = {
+          authorization: "Digest username:password",
+        };
+
+        jest.spyOn(authUtil, "extractAuthToken").mockReturnValue({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          type: "digest" as any,
+          token: "username:password",
+        });
+
+        await authenticate(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext,
+        );
+
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "Unsupported authentication method",
+          }),
+        );
+      });
+
+      it("should handle unexpected errors in authenticate function", async () => {
+        mockReq.headers = {
+          authorization: "Bearer token",
+        };
+
+        // Mock console.error to suppress expected error logs
+        const consoleErrorSpy = jest
+          .spyOn(console, "error")
+          .mockImplementation();
+
+        jest.spyOn(authUtil, "extractAuthToken").mockImplementation(() => {
+          throw new Error("Unexpected error");
+        });
+
+        await authenticate(
+          mockReq as AuthenticatedRequest,
+          mockRes as Response,
+          mockNext,
+        );
+
+        expect(mockRes.status).toHaveBeenCalledWith(500);
+        expect(mockRes.json).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: "Internal server error",
+            message: "Authentication failed",
+          }),
+        );
+        expect(consoleErrorSpy).toHaveBeenCalled();
+
+        consoleErrorSpy.mockRestore();
+      });
+    });
+  });
+
+  describe("optionalAuthenticate middleware", () => {
+    const mockUser = {
+      id: 1,
+      name: "Test User",
+      email: "test@example.com",
+      status: "active",
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    it("should continue without authentication when no header provided", async () => {
+      mockReq.headers = {};
+
+      await optionalAuthenticate(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext,
+      );
+
+      expect(mockNext).toHaveBeenCalled();
+      expect(mockReq.user).toBeUndefined();
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
+
+    it("should authenticate when valid header provided", async () => {
+      const mockToken = "valid.jwt.token";
+      mockReq.headers = {
+        authorization: `Bearer ${mockToken}`,
+      };
+
+      jest.spyOn(authUtil, "verifyToken").mockReturnValue({
+        userId: 1,
+        email: "test@example.com",
+        type: "access",
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      });
+
+      (UserModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+      await optionalAuthenticate(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext,
+      );
+
+      expect(mockNext).toHaveBeenCalled();
+      expect(mockReq.user).toBeDefined();
+    });
+
+    it("should continue without user when authentication fails", async () => {
+      mockReq.headers = {
+        authorization: "Bearer invalid.token",
+      };
+
+      jest.spyOn(authUtil, "verifyToken").mockImplementation(() => {
+        throw new Error("Invalid token");
+      });
+
+      await optionalAuthenticate(
+        mockReq as AuthenticatedRequest,
+        mockRes as Response,
+        mockNext,
+      );
+
+      // Should call next even though authentication failed
+      expect(mockNext).toHaveBeenCalled();
     });
   });
 });

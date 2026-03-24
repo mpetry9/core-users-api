@@ -24,14 +24,14 @@ export const parsePaginationParams = (
 export const buildPaginationMeta = (
   page: number,
   limit: number,
-  totalItems: number,
+  total: number,
 ): PaginationMeta => {
-  const totalPages = Math.ceil(totalItems / limit);
+  const totalPages = Math.ceil(total / limit);
 
   return {
     page,
     limit,
-    totalItems,
+    total,
     totalPages,
     hasNext: page < totalPages,
     hasPrev: page > 1,

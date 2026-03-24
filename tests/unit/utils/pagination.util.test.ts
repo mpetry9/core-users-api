@@ -99,7 +99,7 @@ describe("Pagination Utilities", () => {
 
       expect(meta.page).toBe(1);
       expect(meta.limit).toBe(10);
-      expect(meta.totalItems).toBe(50);
+      expect(meta.total).toBe(50);
       expect(meta.totalPages).toBe(5);
       expect(meta.hasNext).toBe(true);
       expect(meta.hasPrev).toBe(false);
@@ -134,7 +134,7 @@ describe("Pagination Utilities", () => {
     it("should handle empty results", () => {
       const meta = buildPaginationMeta(1, 10, 0);
 
-      expect(meta.totalItems).toBe(0);
+      expect(meta.total).toBe(0);
       expect(meta.totalPages).toBe(0);
       expect(meta.hasNext).toBe(false);
       expect(meta.hasPrev).toBe(false);

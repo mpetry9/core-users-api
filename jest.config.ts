@@ -23,6 +23,7 @@ const config: Config.InitialOptions = {
   coverageDirectory: "coverage",
   verbose: true,
   testTimeout: 10000,
+  maxWorkers: 1, // Run tests serially to avoid database conflicts
   globalSetup: "<rootDir>/tests/setup.ts",
   globalTeardown: "<rootDir>/tests/teardown.ts",
   // Separate test patterns for different test types
