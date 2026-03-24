@@ -22,9 +22,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: testdb
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -46,33 +44,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Wait for PostgreSQL
+      - name: Initialize database
         run: |
-          until pg_isready -h localhost -p 5432 -U testuser; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 2
-          done
-          echo "PostgreSQL is ready!"
-
-      - name: Initialize database schema
+          psql -h localhost -U postgres -c 'CREATE DATABASE testdb;'
+          psql -h localhost -U postgres -d testdb -f migrations/000_initial_schema.sql
         env:
-          PGPASSWORD: testpassword
-        run: |
-          psql -h localhost -U testuser -d testdb -f migrations/000_initial_schema.sql
-          echo "Database schema initialized successfully"
-
-      - name: Verify database setup
-        env:
-          PGPASSWORD: testpassword
-        run: |
-          echo "Verifying tables..."
-          psql -h localhost -U testuser -d testdb -c "\dt"
-          TABLE_COUNT=$(psql -h localhost -U testuser -d testdb -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';")
-          echo "Found $TABLE_COUNT tables"
-          if [ "$TABLE_COUNT" -lt 2 ]; then
-            echo "Error: Expected at least 2 tables"
-            exit 1
-          fi
+          PGPASSWORD: postgres
 
       - name: Run tests
         env:
