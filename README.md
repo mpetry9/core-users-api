@@ -2,6 +2,12 @@
 
 A RESTful API built with Node.js, Express, TypeScript, and PostgreSQL (Neon) following best practices and SOLID principles.
 
+[![Lint](https://github.com/mpetry9/core-users-api/actions/workflows/1-lint.yml/badge.svg)](https://github.com/mpetry9/core-users-api/actions/workflows/1-lint.yml)
+[![Test Suite](https://github.com/mpetry9/core-users-api/actions/workflows/2-suite-test.yml/badge.svg)](https://github.com/mpetry9/core-users-api/actions/workflows/2-suite-test.yml)
+[![Security](https://github.com/mpetry9/core-users-api/actions/workflows/3-vulnerabilities.yml/badge.svg)](https://github.com/mpetry9/core-users-api/actions/workflows/3-vulnerabilities.yml)
+[![Coverage](https://github.com/mpetry9/core-users-api/actions/workflows/4-test-coverage-report.yml/badge.svg)](https://github.com/mpetry9/core-users-api/actions/workflows/4-test-coverage-report.yml)
+[![codecov](https://codecov.io/gh/mpetry9/core-users-api/graph/badge.svg)](https://codecov.io/gh/mpetry9/core-users-api)
+
 ## Features
 
 - ✅ User management with pagination
