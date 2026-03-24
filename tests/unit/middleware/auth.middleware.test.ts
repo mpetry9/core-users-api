@@ -323,7 +323,7 @@ describe("Auth Middleware", () => {
       });
 
       it("should authenticate valid API key", async () => {
-        const apiKey = "test_key_validapikey12345678901234";
+        const apiKey = "test_key_valid_mock_32chars_long";
         mockReq.headers = {
           authorization: `ApiKey ${apiKey}`,
         };
@@ -375,7 +375,7 @@ describe("Auth Middleware", () => {
 
       it("should reject API key not found in database", async () => {
         mockReq.headers = {
-          authorization: "ApiKey test_key_notfound123456789012345",
+          authorization: "ApiKey test_key_notfound_mock_32chars",
         };
 
         jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
@@ -399,7 +399,7 @@ describe("Auth Middleware", () => {
 
       it("should reject revoked API key", async () => {
         mockReq.headers = {
-          authorization: "ApiKey test_key_revoked123456789012345",
+          authorization: "ApiKey test_key_revoked_mock_32chars",
         };
 
         jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
@@ -426,7 +426,7 @@ describe("Auth Middleware", () => {
 
       it("should reject expired API key", async () => {
         mockReq.headers = {
-          authorization: "ApiKey test_key_expired123456789012345",
+          authorization: "ApiKey test_key_expired_mock_32chars",
         };
 
         jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
@@ -451,7 +451,7 @@ describe("Auth Middleware", () => {
 
       it("should reject if user not found", async () => {
         mockReq.headers = {
-          authorization: "ApiKey test_key_orphankey123456789012345",
+          authorization: "ApiKey test_key_orphan_mock_32chars_",
         };
 
         jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
@@ -477,7 +477,7 @@ describe("Auth Middleware", () => {
 
       it("should reject if user is inactive", async () => {
         mockReq.headers = {
-          authorization: "ApiKey test_key_inactiveuser123456789012",
+          authorization: "ApiKey test_key_inactive_mock_32char",
         };
 
         jest.spyOn(authUtil, "isValidApiKeyFormat").mockReturnValue(true);
