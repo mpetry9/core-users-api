@@ -5,6 +5,7 @@ import geoip from "geoip-lite";
 import helmet from "helmet";
 import { UAParser } from "ua-parser-js";
 import { authConfig } from "./config/auth";
+import { swaggerUi, swaggerDocument } from "./config/swagger";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import apiKeysRoutes from "./routes/apiKeys.routes";
 import authRoutes from "./routes/auth.routes";
@@ -52,6 +53,12 @@ const authRateLimiter = rateLimit({
 // ============================================
 
 app.use(express.json());
+
+// ============================================
+// API Documentation (no authentication)
+// ============================================
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // ============================================
 // Public Routes (no authentication required)
