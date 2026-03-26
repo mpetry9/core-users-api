@@ -9,6 +9,7 @@ import { swaggerUi, swaggerDocument } from "./config/swagger";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import apiKeysRoutes from "./routes/apiKeys.routes";
 import authRoutes from "./routes/auth.routes";
+import ordersRoutes from "./routes/orders.routes";
 import usersRoutes from "./routes/users.routes";
 
 const app = express();
@@ -113,6 +114,7 @@ app.use("/auth", authRateLimiter, authRoutes);
 
 app.use("/users", usersRoutes);
 app.use("/keys", apiKeysRoutes);
+app.use("/orders", ordersRoutes);
 
 // ============================================
 // Error Handlers (must be last)
