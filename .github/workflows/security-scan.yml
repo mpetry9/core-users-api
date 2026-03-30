@@ -1,10 +1,7 @@
 name: Security Scan
 
 on:
-  workflow_run:
-    workflows: ["Test Suite"]
-    types:
-      - completed
+  workflow_call:
   schedule:
     # Run every Monday at 9:00 AM UTC
     - cron: "0 9 * * 1"
@@ -14,7 +11,6 @@ jobs:
   audit:
     name: npm Audit
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout code
@@ -39,7 +35,7 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request' }}
 
     steps:
       - name: Checkout code
