@@ -35,9 +35,13 @@ interface BitcoinData {
   priceChange7d: number;
 }
 
+// Constants for formatting
+const BILLION = 1_000_000_000;
+const PRICE_CHANGE_DECIMALS = 2;
+
 function formatPriceChange(change: number): string {
   const sign = change > 0 ? "+" : "";
-  return `${sign}${change}%`;
+  return `${sign}${change.toFixed(PRICE_CHANGE_DECIMALS)}%`;
 }
 
 function displayBitcoinInfo(data: BitcoinData): void {
@@ -49,8 +53,8 @@ function displayBitcoinInfo(data: BitcoinData): void {
       maximumFractionDigits: 2,
     })}`,
   );
-  console.log(`Market Cap:      $${(data.marketCap / 1000000000).toFixed(2)}B`);
-  console.log(`24h Volume:      $${(data.volume / 1000000000).toFixed(2)}B`);
+  console.log(`Market Cap:      $${(data.marketCap / BILLION).toFixed(2)}B`);
+  console.log(`24h Volume:      $${(data.volume / BILLION).toFixed(2)}B`);
   console.log(`Rank:            #${data.rank}`);
   console.log("-------------------------------------");
   console.log("Price Changes:");

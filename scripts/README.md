@@ -69,7 +69,7 @@ curl -X POST http://localhost:3000/auth/login \
 
 ## Get Bitcoin Price Script
 
-The `get-bitcoin-price.ts` script fetches the current Bitcoin price using the CoinStats MCP server.
+The `get-bitcoin-price.ts` script demonstrates how to integrate with the CoinStats MCP server to fetch Bitcoin price data.
 
 ### How to Use
 
