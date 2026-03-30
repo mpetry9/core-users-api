@@ -96,6 +96,8 @@ npm run bitcoin-price
 ```
 🔍 Fetching Bitcoin price from CoinStats MCP Server...
 
+ℹ️  Note: Currently using demonstration data
+
 📊 Bitcoin (BTC) Price Information:
 =====================================
 Price:           $67,500.25
@@ -109,7 +111,14 @@ Price Changes:
   7 Days:        +5.8%
 =====================================
 
-✅ Price fetch complete!
+✅ Demo completed successfully!
+
+💡 Implementation Notes:
+   - This script demonstrates the expected data structure
+   - Currently uses sample data for demonstration
+   - To use real data, the CoinStats MCP server must be configured
+   - The MCP server provides access to live cryptocurrency data
+   - See comments in the code for integration details
 ```
 
 ### CoinStats MCP Server Integration
