@@ -299,13 +299,22 @@ npm run seed
 
 This will create test users with hashed passwords that you can use for testing.
 
-6. **Run the development server:**
+6. **Check Bitcoin price (Optional):**
+
+```bash
+# Fetch current Bitcoin price using CoinStats MCP server
+npm run bitcoin-price
+```
+
+See [scripts/README.md](scripts/README.md) for more information about available scripts.
+
+7. **Run the development server:**
 
 ```bash
 npm run dev
 ```
 
-7. **Test the authentication system:**
+8. **Test the authentication system:**
 
 ```bash
 # Make the test script executable (if needed)
@@ -315,7 +324,7 @@ chmod +x test-auth.sh
 ./test-auth.sh
 ```
 
-8. **Build for production:**
+9. **Build for production:**
 
 ```bash
 npm run build
