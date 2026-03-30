@@ -107,8 +107,8 @@ Rank:            #1
 -------------------------------------
 Price Changes:
   1 Hour:        +0.45%
-  24 Hours:      +2.3%
-  7 Days:        +5.8%
+  24 Hours:      +2.30%
+  7 Days:        +5.80%
 =====================================
 
 ✅ Demo completed successfully!
