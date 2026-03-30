@@ -299,14 +299,14 @@ npm run seed
 
 This will create test users with hashed passwords that you can use for testing.
 
-6. **Check Bitcoin price (Optional):**
+6. **Check Bitcoin price (Optional - Demo):**
 
 ```bash
-# Fetch current Bitcoin price using CoinStats MCP server
+# Demonstration of Bitcoin price fetching with CoinStats MCP server
 npm run bitcoin-price
 ```
 
-See [scripts/README.md](scripts/README.md) for more information about available scripts.
+This is a demonstration script showing how to integrate with the CoinStats MCP server. It displays sample Bitcoin data to illustrate the expected output format. See [scripts/README.md](scripts/README.md) for more information about available scripts.
 
 7. **Run the development server:**
 

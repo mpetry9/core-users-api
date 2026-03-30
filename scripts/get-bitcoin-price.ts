@@ -63,6 +63,7 @@ function displayBitcoinInfo(data: BitcoinData): void {
 async function getBitcoinPrice(): Promise<void> {
   try {
     console.log("🔍 Fetching Bitcoin price from CoinStats MCP Server...\n");
+    console.log("ℹ️  Note: Currently using demonstration data\n");
 
     //
     // COINSTATS MCP SERVER INTEGRATION
@@ -100,9 +101,14 @@ async function getBitcoinPrice(): Promise<void> {
     // }
     //
 
-    // For demonstration, showing expected data structure
+    // For demonstration, showing expected data structure with sample values
     // In production, this would be replaced with actual MCP server call:
     // const bitcoinData = await mcpServer.getCoinById('bitcoin');
+    //
+    // To implement real API calls:
+    // 1. Configure CoinStats MCP server connection
+    // 2. Replace the mock data below with actual API call
+    // 3. Use: const bitcoinData = await coinstats.getCoinById({ coinId: 'bitcoin' })
 
     const bitcoinData: BitcoinData = {
       id: "bitcoin",
@@ -120,9 +126,10 @@ async function getBitcoinPrice(): Promise<void> {
     // Display the Bitcoin price information
     displayBitcoinInfo(bitcoinData);
 
-    console.log("✅ Price fetch complete!");
+    console.log("✅ Demo completed successfully!");
     console.log("\n💡 Implementation Notes:");
     console.log("   - This script demonstrates the expected data structure");
+    console.log("   - Currently uses sample data for demonstration");
     console.log(
       "   - To use real data, the CoinStats MCP server must be configured",
     );

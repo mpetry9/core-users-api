@@ -85,10 +85,11 @@ npm run bitcoin-price
 
 ### Features
 
-✅ **Real-time Bitcoin Data** - Fetches current price from CoinStats API  
-✅ **Comprehensive Information** - Shows price, market cap, volume, and rank  
-✅ **Price Change Tracking** - Displays 1h, 24h, and 7d price changes  
-✅ **Formatted Output** - Clean, easy-to-read display format
+✅ **Bitcoin Price Demonstration** - Shows integration pattern with CoinStats MCP server  
+✅ **Comprehensive Information** - Displays price, market cap, volume, and rank  
+✅ **Price Change Tracking** - Shows 1h, 24h, and 7d price changes  
+✅ **Formatted Output** - Clean, easy-to-read display format  
+✅ **Integration Example** - Demonstrates expected API response structure
 
 ### Example Output
 
@@ -113,26 +114,32 @@ Price Changes:
 
 ### CoinStats MCP Server Integration
 
-This script uses the **CoinStats Model Context Protocol (MCP)** server to fetch cryptocurrency data. The MCP server provides several tools:
+This script **demonstrates** how to integrate with the **CoinStats Model Context Protocol (MCP)** server. Currently, it uses sample data to show the expected structure and output format. The MCP server provides several tools for fetching live cryptocurrency data:
 
 1. **coinstats-mcp-get-coin-by-id** - Get detailed information about a specific coin
 2. **coinstats-mcp-get-coins** - Get comprehensive data about multiple cryptocurrencies
 3. **coinstats-mcp-get-coin-chart-by-id** - Get historical price chart data
 
-#### How It Works
+#### How It Works (When Connected to Real MCP Server)
 
-- The script connects to the CoinStats API through the MCP server
+- The script would connect to the CoinStats API through the MCP server
 - Bitcoin is identified by the coin ID `"bitcoin"`
 - The API returns real-time price, market cap, volume, and price change data
 - Data is formatted and displayed in a user-friendly format
 
 #### Configuration
 
-To use this script with real data, ensure the CoinStats MCP server is properly configured. See the comments in `get-bitcoin-price.ts` for integration details.
+**Current Status**: This script currently uses sample data for demonstration purposes. To integrate with real-time CoinStats data:
+
+1. Configure the CoinStats MCP server connection
+2. Update the script to call actual MCP server tools (see comments in `get-bitcoin-price.ts`)
+3. The script shows the exact data structure expected from the API
+
+See the comments in `get-bitcoin-price.ts` for detailed integration instructions.
 
 ### Use Cases
 
-- **Quick Price Check** - Get Bitcoin price without leaving the terminal
-- **Integration Testing** - Verify CoinStats MCP server connectivity
-- **Data Monitoring** - Track Bitcoin price changes over time
-- **API Examples** - Reference implementation for CoinStats integration
+- **Integration Example** - Reference implementation for CoinStats MCP integration
+- **Data Structure Demo** - Shows expected API response format
+- **Quick Testing** - Verify script execution without API dependencies
+- **Documentation** - Demonstrates how to display cryptocurrency data
