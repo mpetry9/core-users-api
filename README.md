@@ -8,6 +8,10 @@ A RESTful API built with Node.js, Express, TypeScript, and PostgreSQL (Neon) fol
 [![Test Coverage](https://github.com/mpetry9/core-users-api/actions/workflows/test-coverage.yml/badge.svg)](https://github.com/mpetry9/core-users-api/actions/workflows/test-coverage.yml)
 [![codecov](https://codecov.io/gh/mpetry9/core-users-api/graph/badge.svg)](https://codecov.io/gh/mpetry9/core-users-api)
 
+## Sunburst Graph of Test Coverage
+
+[![Codecov Sunburst](https://codecov.io/gh/mpetry9/core-users-api/graphs/sunburst.svg?token=1F7FSYDIEY)](https://codecov.io/gh/mpetry9/core-users-api)
+
 ## Features
 
 - ✅ User management with pagination
